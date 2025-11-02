@@ -6,8 +6,8 @@
 #define LEN(a) sizeof(a)/sizeof(a[0])
 
 #define ERROR(message) \
-    perror(message); \
-    exit(EXIT_FAILURE);
+    (void)perror(message); \
+    (void)exit(EXIT_FAILURE);
 
 struct p_argument_t {
     /**
