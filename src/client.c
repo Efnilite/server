@@ -8,7 +8,7 @@
 #include <string.h>
 #include <bits/signum-generic.h>
 
-#include "shared.h"
+#include "util.h"
 
 int fd;
 
@@ -22,7 +22,7 @@ void handle_term(const int _) {
     exit(EXIT_SUCCESS);
 }
 
-int main(void) {
+int main(int argc, char* argv[]) {
     fprintf(stderr, "Client init\n");
 
     fd = socket(AF_INET, SOCK_STREAM, 0);

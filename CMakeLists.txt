@@ -4,9 +4,9 @@ project(web_server C)
 set(CMAKE_C_STANDARD 11)
 
 add_executable(server src/server.c
-        src/shared.c
-        src/shared.h)
+        src/util.c
+        src/util.h)
 
 add_executable(client src/client.c
-        src/shared.c
-        src/shared.h)
+        src/util.c
+        src/util.h)

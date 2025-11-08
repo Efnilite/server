@@ -7,16 +7,20 @@
 #include <stdbool.h>
 #include <string.h>
 
-#include "shared.h"
+#include "util.h"
 
-#define PORT 8080
 #define MAX_BACKLOG 10
 #define MAX_TCP_BYTES_SIZE 4096
 
 int fd;
+long port = 8080;
+
+void server_parse_port(const char* str) {
+    port = parse_int(str);
+}
 
 struct p_argument_t arguments[] = {
-    {'p', 1}, // the port
+    {'p', 1, server_parse_port},
 };
 
 void handle_term(const int _)  {
@@ -29,7 +33,9 @@ void handle_term(const int _)  {
     exit(EXIT_SUCCESS);
 }
 
-int main(void) {
+int main(const int argc, char* argv[]) {
+    parse_program_arguments(arguments, LEN(arguments), argc, argv);
+
     fprintf(stderr, "Server init\n");
 
     fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -40,7 +46,7 @@ int main(void) {
 
     const struct sockaddr_in addr_in = {
         .sin_family = AF_INET,
-        .sin_port = htons(PORT),
+        .sin_port = htonl(port),
         .sin_addr = {.s_addr = htonl(INADDR_ANY)}
     };
 
