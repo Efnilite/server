@@ -1,12 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/socket.h>
-#include <netinet/in.h>
+#include <netinet/ip.h>
 #include <unistd.h>
 #include <poll.h>
 #include <signal.h>
 #include <stdbool.h>
-#include <bits/signum-generic.h>
+#include <string.h>
 
 #include "shared.h"
 
@@ -30,7 +30,7 @@ void handle_term(const int _)  {
     exit(EXIT_SUCCESS);
 }
 
-int main(int argc, char* argv[]) {
+int main(void) {
     fprintf(stderr, "Server init\n");
 
     fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -42,7 +42,7 @@ int main(int argc, char* argv[]) {
     const struct sockaddr_in addr_in = {
         .sin_family = AF_INET,
         .sin_port = htons(PORT),
-        .sin_addr = {.s_addr = htonl(INADDR_LOOPBACK)}
+        .sin_addr = {.s_addr = htonl(INADDR_ANY)}
     };
 
     if (bind(fd, (const struct sockaddr*)&addr_in, sizeof(addr_in)) != 0) {
@@ -57,7 +57,8 @@ int main(int argc, char* argv[]) {
 
     struct sockaddr other_addr;
     socklen_t other_len;
-    if (accept(fd, &other_addr, &other_len) != 0) {
+    const int other_fd = accept(fd, &other_addr, &other_len);
+    if (other_fd == -1) {
         ERROR("Failed to accept peer connection");
     }
 
@@ -70,21 +71,27 @@ int main(int argc, char* argv[]) {
     };
 
     while (true) {
-        const int result = poll(poll_fd, LEN(poll_fd), -1);
-        if (result <= 0) {
-            ERROR("An error occurred while trying to poll file descriptor");
-        }
-
-        for (int i = 0; i < LEN(poll_fd); ++i) {
-
-        }
+        // const int result = poll(poll_fd, LEN(poll_fd), -1);
+        // if (result <= 0) {
+        //     ERROR("An error occurred while trying to poll file descriptor");
+        // }
 
         char buff[MAX_TCP_BYTES_SIZE];
-        const ssize_t count = read(fd, &buff, MAX_TCP_BYTES_SIZE);
+        const ssize_t count = read(other_fd, &buff, MAX_TCP_BYTES_SIZE-1);
+        (void)fprintf(stderr, "Read %s\n", buff);
         if (count <= 0) {
-            continue; // empty message
+            ERROR("WTF"); // empty message
+        }
+
+        (void)fprintf(stderr, "2 Read %s\n", buff);
+
+        const char* b = "OK";
+
+        if (write(other_fd, b, strlen(b)) <= 0) {
+            ERROR("Failed to write");
         }
     }
 
+    handle_term(0);
     return 0;
 }
