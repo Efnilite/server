@@ -3,7 +3,6 @@
 #include <sys/socket.h>
 #include <netinet/ip.h>
 #include <unistd.h>
-#include <poll.h>
 #include <signal.h>
 #include <stdbool.h>
 #include <string.h>
@@ -61,14 +60,6 @@ int main(void) {
     if (other_fd == -1) {
         ERROR("Failed to accept peer connection");
     }
-
-    struct pollfd poll_fd[1] = {
-        {
-            .fd = fd,
-            .events = POLLIN | POLLERR | POLLHUP | POLLNVAL,
-            .revents = 0
-        }
-    };
 
     while (true) {
         // const int result = poll(poll_fd, LEN(poll_fd), -1);
