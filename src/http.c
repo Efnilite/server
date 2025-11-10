@@ -12,8 +12,8 @@
  * @param request The request to populate.
  * @return The url of the request and the method.
  */
-static int http_parse_method(const char* str, struct http_request_url_t* request) {
-    char copy[HTTP_MAX_HEADER_LEN];
+private int http_parse_method(const char* str, struct http_request_url_t* request) {
+    char copy[strlen(str)];
     if (strncpy(copy, str, strlen(str)) == NULL) {
         perror("Failed to copy string");
         return FAILURE;
@@ -28,17 +28,53 @@ static int http_parse_method(const char* str, struct http_request_url_t* request
         perror("Failed to recognize method");
         return FAILURE;
     }
-    fprintf(stderr, "Read method as %s\n", part);
 
     part = strtok(NULL, " ");
     request->url = part;
-    fprintf(stderr, "Read url as %s\n", part);
 
     part = strtok(NULL, " ");
     request->version = part;
-    fprintf(stderr, "Read ver as %s\n", part);
 
     return SUCCESS;
+}
+
+private int http_parse_encoding_header(const char* str, enum HttpEncoding* encoding) {
+    char copy[strlen(str)];
+    if (strncpy(copy, str, strlen(str)) == NULL) {
+        perror("Failed to copy string");
+        return FAILURE;
+    }
+
+    const char* key = strtok(copy, ",");
+
+    for (int i = 0; i < ENCODING_LENGTH; ++i) {
+
+    }
+}
+
+private int http_parse_header(const char* str, struct http_request_t* request) {
+    char copy[strlen(str)];
+    if (strncpy(copy, str, strlen(str)) == NULL) {
+        perror("Failed to copy string");
+        return FAILURE;
+    }
+
+    const char* key = strtok(copy, ":");
+    char* value = strtok(NULL, ":");
+
+    if (strcasecmp(key, "host") == 0) {
+        request->host = value;
+    } else if (strcasecmp(key, "user-agent") == 0) {
+        request->agent = value;
+    } else if (strcasecmp(key, "accept") == 0) {
+        request->accept = value;
+    } else if (strcasecmp(key, "accept-language") == 0) {
+        request->language = value;
+    } else if (strcasecmp(key, "accept-encoding") == 0) {
+        request->encoding = value;
+    } else if (strcasecmp(key, "connection") == 0) {
+        request->connection = value;
+    }
 }
 
 int parse_request(const int fd, struct http_request_t* request) {

@@ -34,6 +34,7 @@ struct http_request_t {
     struct http_request_url_t url;
     char* host;
     char* agent;
+    char* accept;
     char* language;
     enum HttpEncoding encoding[ENCODING_LENGTH];
     char* connection;

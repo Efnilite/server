@@ -6,6 +6,7 @@
 #include <stdlib.h>
 
 #define LEN(a) sizeof(a)/sizeof(a[0])
+#define private static
 
 #define ERROR(message) \
     (void)perror(message); \
