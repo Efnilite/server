@@ -15,17 +15,11 @@ enum HttpRequestMethodType {
     REQUEST_METHOD_LENGTH,
 };
 
-/**
- * @param str The string to parse.
- * @return The method type.
- */
-enum HttpRequestMethodType http_parse_method_type(const char* str);
-
-/**
- * @param method The method to stringify.
- * @return The appropriate string.
- */
-char* http_method_type_to_string(enum HttpRequestMethodType method);
+struct http_request_url_t {
+    enum HttpRequestMethodType method;
+    char* url;
+    char* version;
+};
 
 enum HttpEncoding {
     ENCODING_GZIP,
@@ -37,16 +31,15 @@ enum HttpEncoding {
  */
 struct http_request_t {
     // headers
-    enum HttpRequestMethodType method;
+    struct http_request_url_t method;
     char* host;
     char* agent;
     char* language;
     enum HttpEncoding encoding[ENCODING_LENGTH];
     char* connection;
-
-    // content
-    char* content;
 };
+
+struct http_request_t* parse_request(int fd);
 
 /**
  * A response sent by the server.
@@ -59,5 +52,7 @@ struct http_response_t {
     // content
     char* content;
 };
+
+const char* response_to_string(const struct http_response_t* response);
 
 #endif //CS_HTTP_H
