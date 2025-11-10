@@ -31,7 +31,7 @@ enum HttpEncoding {
  */
 struct http_request_t {
     // headers
-    struct http_request_url_t method;
+    struct http_request_url_t url;
     char* host;
     char* agent;
     char* language;
@@ -39,7 +39,7 @@ struct http_request_t {
     char* connection;
 };
 
-struct http_request_t* parse_request(int fd);
+int parse_request(int fd, struct http_request_t* request);
 
 /**
  * A response sent by the server.

@@ -9,22 +9,24 @@
 /**
  * Parses the request url and method.
  * @param str The string to parse.
+ * @param request The request to populate.
  * @return The url of the request and the method.
  */
-struct http_request_url_t* http_parse_method(char* str) {
-    struct http_request_url_t* request = malloc(sizeof(struct http_request_url_t));
-    if (request == NULL) {
-        perror("Failed to allocate request url");
-        return NULL;
+static int http_parse_method(const char* str, struct http_request_url_t* request) {
+    char copy[HTTP_MAX_HEADER_LEN];
+    if (strncpy(copy, str, strlen(str)) == NULL) {
+        perror("Failed to copy string");
+        return FAILURE;
     }
 
-    char* part = strtok(str, " ");
+    char* part = strtok(copy, " ");
     if (strcmp(part, "GET") == 0) {
         request->method = REQUEST_METHOD_GET;
     } else if (strcmp(part, "HEAD") == 0) {
         request->method = REQUEST_METHOD_HEAD;
     } else {
-        request->method = REQUEST_METHOD_LENGTH;
+        perror("Failed to recognize method");
+        return FAILURE;
     }
     fprintf(stderr, "Read method as %s\n", part);
 
@@ -36,22 +38,19 @@ struct http_request_url_t* http_parse_method(char* str) {
     request->version = part;
     fprintf(stderr, "Read ver as %s\n", part);
 
-    return request;
+    return SUCCESS;
 }
 
-struct http_request_t* parse_request(const int fd) {
-    FILE* fp = fdopen(fd, "r");
-
-    if (fp == NULL) {
-        perror("Failed to open file fp");
-        return NULL;
+int parse_request(const int fd, struct http_request_t* request) {
+    if (request == NULL) {
+        perror("Failed to allocate for request");
+        return FAILURE;
     }
 
-    struct http_request_t* request = malloc(sizeof(struct http_request_t));
-    if (request == NULL) {
-        fclose(fp);
-        perror("Failed to allocate for request");
-        return NULL;
+    FILE* fp = fdopen(fd, "r");
+    if (fp == NULL) {
+        perror("Failed to open file fp");
+        return FAILURE;
     }
 
     char line[HTTP_MAX_HEADER_LEN];
@@ -60,6 +59,13 @@ struct http_request_t* parse_request(const int fd) {
         perror("Empty request");
         goto error;
     }
+
+    struct http_request_url_t url;
+    if (http_parse_method(line, &url) == FAILURE) {
+        perror("Failed to parse url");
+        goto error;
+    }
+    request->url = url;
 
     while (fgets(line, HTTP_MAX_HEADER_LEN, fp) != NULL) {
         const size_t len = strlen(line);
@@ -82,12 +88,11 @@ struct http_request_t* parse_request(const int fd) {
     }
 
     fclose(fp);
-    return request;
+    return SUCCESS;
 
 error:
     fclose(fp);
-    free(request);
-    return NULL;
+    return FAILURE;
 }
 
 const char* response_to_string(const struct http_response_t* response) {}

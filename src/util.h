@@ -16,6 +16,9 @@
     (void)perror(message); \
     (void)exit(EXIT_FAILURE);
 
+#define SUCCESS 0
+#define FAILURE (-1)
+
 /**
  * Represents an argument that can be passed to the program argument.
  */

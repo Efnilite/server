@@ -75,6 +75,9 @@ int main(const int argc, char* argv[]) {
         // }
 
         char buff[MAX_TCP_BYTES_SIZE];
+        for (int i = 0; i < MAX_TCP_BYTES_SIZE; ++i) {
+            buff[0] = '\0';
+        }
         const ssize_t count = read(other_fd, &buff, MAX_TCP_BYTES_SIZE-1);
         (void)fprintf(stderr, "Read %s\n", buff);
         if (count <= 0) {
