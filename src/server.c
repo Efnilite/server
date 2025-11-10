@@ -7,6 +7,7 @@
 #include <stdbool.h>
 #include <string.h>
 
+#include "http.h"
 #include "util.h"
 
 #define MAX_BACKLOG 10

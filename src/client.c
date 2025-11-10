@@ -33,7 +33,7 @@ int main(int argc, char* argv[]) {
 
     const struct sockaddr_in addr_in = {
         .sin_family = AF_INET,
-        .sin_port = htons(8080),
+        .sin_port = htonl(8080),
         .sin_addr = {.s_addr = htonl(INADDR_LOOPBACK)}
     };
 
@@ -41,11 +41,11 @@ int main(int argc, char* argv[]) {
         ERROR("Failed to connect to peer socket");
     }
 
-    const char* hey = "hey";
+    const char* hey = "GET /index HTTP/1.1";
 
     write(fd, hey, strlen(hey));
 
-    (void)fprintf(stderr, "Sent hey\n");
+    (void)fprintf(stderr, "Sent GET\n");
 
     char buff[4096];
     for (int i = 0; i < LEN(buff); ++i) {
