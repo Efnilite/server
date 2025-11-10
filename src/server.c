@@ -47,7 +47,7 @@ int main(const int argc, char* argv[]) {
 
     const struct sockaddr_in addr_in = {
         .sin_family = AF_INET,
-        .sin_port = htonl(port),
+        .sin_port = htons(port),
         .sin_addr = {.s_addr = htonl(INADDR_ANY)}
     };
 

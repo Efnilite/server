@@ -33,7 +33,7 @@ int main(int argc, char* argv[]) {
 
     const struct sockaddr_in addr_in = {
         .sin_family = AF_INET,
-        .sin_port = htonl(8080),
+        .sin_port = htons(8080),
         .sin_addr = {.s_addr = htonl(INADDR_LOOPBACK)}
     };
 
