@@ -1,6 +1,7 @@
 #ifndef CS_HTTP_H
 #define CS_HTTP_H
 
+#include <stdbool.h>
 #include <stdint.h>
 
 #define HTTP_VERSION "HTTP/1.1"
@@ -36,7 +37,7 @@ struct http_request_t {
     char* agent;
     char* accept;
     char* language;
-    enum HttpEncoding encoding[ENCODING_LENGTH];
+    bool encoding[ENCODING_LENGTH];
     char* connection;
 };
 

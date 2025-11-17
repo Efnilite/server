@@ -2,6 +2,10 @@
 #include <string.h>
 
 #include "http.h"
+
+#include <ctype.h>
+#include <stdbool.h>
+
 #include "util.h"
 
 #define HTTP_MAX_HEADER_LEN 4096
@@ -38,20 +42,65 @@ private int http_parse_method(const char* str, struct http_request_url_t* reques
     return SUCCESS;
 }
 
-private int http_parse_encoding_header(const char* str, enum HttpEncoding* encoding) {
+/**
+ * Removes leading and trailing spaces in str.
+ * @param str The string to trim.
+ */
+private void str_trim(char* str) {
+    const size_t len = strlen(str);
+    size_t first = 0;
+
+    while (isspace(str[first])) {
+        first++;
+    }
+
+    if (first == len) {
+        return;
+    }
+
+    size_t last = len - 1;
+    while (isspace(str[last])) {
+        last--;
+    }
+
+    memmove(str, str + first, last - first + 1);
+    str[last - first + 1] = '\0';
+}
+
+/**
+ * Parses the encoding values.
+ * @param str The values to parse.
+ * @param request The request.
+ * @return -1 on failure, 0 for success.
+ */
+private int http_parse_encoding_header(const char* str, struct http_request_t* request) {
     char copy[strlen(str)];
     if (strncpy(copy, str, strlen(str)) == NULL) {
         perror("Failed to copy string");
         return FAILURE;
     }
 
-    const char* key = strtok(copy, ",");
+    char* part = strtok(copy, ",");
 
     for (int i = 0; i < ENCODING_LENGTH; ++i) {
+        str_trim(part);
 
+        if (strcasecmp(part, "gzip") == 0) {
+            request->encoding[ENCODING_GZIP] = true;
+        }
+
+        part = strtok(NULL, ",");
     }
+
+    return SUCCESS;
 }
 
+/**
+ * Parses a header line.
+ * @param str The header line
+ * @param request A request struct pointer.
+ * @return -1 on failure, 0 for success.
+ */
 private int http_parse_header(const char* str, struct http_request_t* request) {
     char copy[strlen(str)];
     if (strncpy(copy, str, strlen(str)) == NULL) {
@@ -71,7 +120,10 @@ private int http_parse_header(const char* str, struct http_request_t* request) {
     } else if (strcasecmp(key, "accept-language") == 0) {
         request->language = value;
     } else if (strcasecmp(key, "accept-encoding") == 0) {
-        request->encoding = value;
+        if (http_parse_encoding_header(value, request) == FAILURE) {
+            perror("Failed to parse encoding header");
+            return FAILURE;
+        }
     } else if (strcasecmp(key, "connection") == 0) {
         request->connection = value;
     }
